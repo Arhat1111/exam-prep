@@ -28,3 +28,11 @@ Static GitHub Pages frontend + Supabase Auth/database + Supabase Edge Function c
 - Files are forwarded transiently to Gemini and are **not** permanently saved. Analysis reports save to browser localStorage and, after Sign In + Save, to Supabase `public.reports`.
 - No hard usage caps per student, CAPTCHA, billing guards, token-refresh implementation, or automatic handwriting correction exist yet. Add those before public launch. `--no-verify-jwt` is safe only while Edge Function's explicit Auth check is retained.
 - The AI can make mistakes, especially reading handwriting or interpreting ambiguous marking schemes. Use results as assisted feedback, not authoritative grading.
+
+## Reliability & persistent login update (October 2026)
+- Login now persists in browser `localStorage` and refreshes Supabase access tokens automatically using a rotating refresh token. The user stays signed in on the same browser unless they sign out, clear browser site data, change account credentials, or the refresh token is revoked/expired. Do not use persistent login on a shared computer.
+- Gemini requests are aborted after 45 seconds, and the backend returns HTTP 504 with a readable message instead of waiting until the Supabase gateway times out. The model output budget is reduced to 6144 tokens. Long exams may need to be split into smaller uploads; output may be incomplete.
+- This update **does not cure Supabase platform 503 responses** if they happen before the function runs. If even a one-question analysis still takes ~160 seconds and shows 503, investigate Supabase gateway/service health or move the backend to a different serverless host such as Cloudflare Workers / Google Cloud Run. This alternative requires additional deployment and code adaptation.
+- To install: replace index.html, app.js and styles.css in GitHub; redeploy the updated Edge Function `supabase/functions/analyze-paper/index.ts`. Database SQL schema is unchanged.
+- Deployment from this extracted folder: `npx --yes supabase functions deploy analyze-paper --project-ref gvxmvvthyztptlopovyj --no-verify-jwt --use-api`
+- Confirm `GEMINI_API_KEY` exists in Supabase Edge Function Secrets. Do not commit secrets.
