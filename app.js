@@ -34,8 +34,11 @@ async function request(path,method='GET',body,repeat=true){
   if(path.includes('on_conflict=id'))headers.Prefer='resolution=merge-duplicates,return=minimal';
   if(!isAuth)headers.Authorization='Bearer '+session.access_token;
   let response;
-  try{response=await fetch(url.replace(/\/$/,'')+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});}
-  catch(e){throw Error('Cannot connect to Supabase. Check network access and the Edge Function invocation logs. If it runs for 2–3 minutes then fails, this may be a Supabase gateway timeout.');}
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),65000);
+  try{response=await fetch(url.replace(/\/$/,'')+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),signal:controller.signal});}
+  catch(e){throw Error(e?.name==='AbortError'?'Analysis request exceeded 65 seconds. The backend did not respond in time.':'Cannot reach Supabase or the request was blocked. Check the function health link and Supabase Invocations.');}
+  finally{clearTimeout(timeout);}
   if(response.status===401&&!isAuth&&repeat){await refreshSession();return request(path,method,body,false);}
   const data=await response.json().catch(()=>({}));
   if(!response.ok){
