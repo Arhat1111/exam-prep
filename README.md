@@ -1,20 +1,30 @@
-# Clarity — AI Test Paper Analyzer
+# Clarity — Gemini 2.5 Flash-Lite Edition
 
-A responsive static frontend for GitHub Pages with a Supabase Edge Function AI backend.
+Static GitHub Pages frontend + Supabase Auth/database + Supabase Edge Function calling Google Gemini 2.5 Flash-Lite.
+
+## Your Supabase project
+- Project ref: `gvxmvvthyztptlopovyj`
+- URL and **publishable** public key are configured in `app.js`.
 
 ## Setup
-1. Create a Supabase project. Run `supabase/schema.sql` in its SQL editor. If you already have policies with the same names, skip/reconcile them.
-2. Install Supabase CLI, authenticate, link your project: `supabase login` and `supabase link --project-ref YOUR_REF`.
-3. Set server-only AI secret: `supabase secrets set OPENAI_API_KEY=YOUR_KEY` (never commit this key). Optionally `supabase secrets set OPENAI_MODEL=gpt-4.1`.
-4. Deploy: `supabase functions deploy analyze-paper`. Keep JWT verification enabled. If your project uses newer asymmetric publishable keys, ensure the deployed function accepts the auth scheme you use; legacy anon JWT works with standard verification.
-5. Upload `index.html`, `styles.css`, `app.js` to your GitHub repository, and enable Pages under Settings → Pages → Deploy from branch → main / root.
-6. In the website Settings, enter Supabase Project URL and public **anon** key. Sign up/sign in to synchronize saved reports. Confirm your email if Supabase Auth requires it.
+1. Go to Supabase SQL Editor and run `supabase/schema.sql` (or skip if the `reports` table and all four RLS policies already exist).
+2. Under Supabase Authentication → Providers, enable Email. Set Site URL and redirect URLs to your GitHub Pages URL once known.
+3. Create a Gemini API key via https://aistudio.google.com/apikey .
+4. In Supabase Dashboard → Edge Functions → Secrets, set `GEMINI_API_KEY` to that value. Do NOT put the key in frontend files or GitHub.
+5. With Node installed, open Terminal **in this extracted folder**, then run:
+   ```sh
+   npx supabase login
+   npx supabase link --project-ref gvxmvvthyztptlopovyj
+   npx supabase functions deploy analyze-paper --no-verify-jwt
+   ```
+   The Edge Function checks authorization with Supabase Auth even though gateway-level legacy JWT verification is disabled. This is required for the newer publishable key.
+6. Upload `index.html`, `app.js`, `styles.css` to GitHub repository root. Enable GitHub Pages → deploy main branch `/ (root)`.
+7. Sign up and sign in from the website's Settings. Upload a small paper, analyze, and save the report.
 
-## Notes and limitations
-- GitHub Pages alone cannot run an AI model or protect secret keys; the Edge Function calls OpenAI securely.
-- The app stores reports in browser localStorage and syncs with Supabase for signed-in users. Original uploaded documents are **not** persisted; resubmit them for a fresh analysis. Browser localStorage is not a reliable backup. Export JSON as a backup.
-- Current analysis accepts up to 12 files and ~26 MB of base64 payload; large PDFs may exceed model context or service limits.
-- The AI may misread handwriting, skip questions, or give wrong grades/solutions. Review results before relying on them. `needs_review` marks uncertain items.
-- Uploads are transmitted to Supabase and the configured AI provider; avoid uploading sensitive documents without consent.
-- For production: add rate limits, CAPTCHA/abuse protection, billing caps, stricter CORS origins, PDF page splitting for very large PDFs, robust grading rubrics, teacher verification, and token refresh. Edge Function currently uses default Supabase JWT validation and accepts anon clients; lock it to authenticated users and add usage limits before public launch.
-- Supabase upsert sync assumes no duplicate report ID conflicts across users. Local history remains per browser.
+## Important notes
+- The AI provider is **Gemini**, not OpenAI. You only need the `GEMINI_API_KEY` secret (no `OPENAI_API_KEY`).
+- Google sets request-per-minute, token-per-minute, and request-per-day quotas. Free-tier capacity is limited and may change. Check https://aistudio.google.com/rate-limit . An upload can fail with 429 when quota is exceeded; that is not a Supabase error.
+- Gemini free-tier data may be used to improve Google products; review terms and obtain consent for students' documents before uploads.
+- Files are forwarded transiently to Gemini and are **not** permanently saved. Analysis reports save to browser localStorage and, after Sign In + Save, to Supabase `public.reports`.
+- No hard usage caps per student, CAPTCHA, billing guards, token-refresh implementation, or automatic handwriting correction exist yet. Add those before public launch. `--no-verify-jwt` is safe only while Edge Function's explicit Auth check is retained.
+- The AI can make mistakes, especially reading handwriting or interpreting ambiguous marking schemes. Use results as assisted feedback, not authoritative grading.
