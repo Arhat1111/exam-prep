@@ -12,3 +12,23 @@
 .qtop strong,.answer{overflow-wrap:anywhere;}
 .answer p{margin:6px 0 10px;}
 @media(max-width:750px){.solution{padding:16px}.solution .katex{font-size:1em}}
+
+/* Clear math, steps, and verification across screen sizes */
+.math-recovered{display:inline-block;vertical-align:middle;max-width:100%;overflow-x:auto;overflow-y:hidden;margin:0 .15em;padding:.15em 0;}
+.math-prose{font-size:15px;line-height:1.95;color:#24362b;letter-spacing:.01em;}
+.math-prose p{margin:0 0 15px;overflow-wrap:anywhere;}
+.math-prose .solution-step{margin:20px 0 10px;font-size:15px;line-height:1.5;color:#245d43;}
+.math-fallback{font-family:Georgia,'Times New Roman',serif;white-space:normal;overflow-wrap:anywhere;}
+.katex{max-width:100%;} .katex-display{max-width:100%;overflow-x:auto;overflow-y:hidden;}
+.solution{white-space:normal!important;}
+.storage-actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.historyrow small{line-height:1.65;display:inline-block;margin-top:3px;}
+@media(max-width:600px){.math-prose{font-size:14px}.math-recovered{max-width:100%}.storage-actions .secondary{width:100%}}
+
+/* v4: keep regular prose readable; typeset mathematical atoms only */
+.math-inline-wrap{display:inline-block;vertical-align:middle;max-width:100%;overflow-x:auto;overflow-y:hidden;white-space:nowrap;margin:0 .12em;padding:.12em 0;}
+.solution .math-prose p,.question .answer p{white-space:normal;word-break:normal;overflow-wrap:break-word;}
+.question .qtop strong{line-height:1.85;flex:1;min-width:0;}
+.question .katex,.math-prose .katex{font-size:1.06em;}
+.math-fallback{font-family:Georgia,serif;white-space:normal;overflow-wrap:anywhere;}
+@media(max-width:650px){.question .qtop{align-items:flex-start}.math-inline-wrap{max-width:100%;}.question .katex{font-size:1em;}}
