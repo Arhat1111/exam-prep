@@ -32,3 +32,10 @@
 .question .katex,.math-prose .katex{font-size:1.06em;}
 .math-fallback{font-family:Georgia,serif;white-space:normal;overflow-wrap:anywhere;}
 @media(max-width:650px){.question .qtop{align-items:flex-start}.math-inline-wrap{max-width:100%;}.question .katex{font-size:1em;}}
+
+/* Subject-wise history and learning analysis */
+.subject-filter{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 18px;font-weight:650;color:#24382d;}
+.subject-filter select{background:#fff;border:1px solid #d8e5dc;border-radius:10px;padding:10px 14px;color:#203b2b;min-width:190px;max-width:100%;font:inherit;}
+.subject-group{margin:16px 0 30px;padding-bottom:15px;border-bottom:1px solid #e6ede8;}
+.subject-group h2{margin:12px 0 5px;}
+@media(max-width:650px){.subject-filter{align-items:stretch;flex-direction:column}.subject-filter select{width:100%}}
